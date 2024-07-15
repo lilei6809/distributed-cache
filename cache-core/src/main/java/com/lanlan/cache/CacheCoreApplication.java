@@ -1,4 +1,4 @@
-package com.lanlan.cachecore;
+package com.lanlan.cache;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
