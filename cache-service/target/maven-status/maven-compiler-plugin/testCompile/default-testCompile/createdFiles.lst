@@ -1,1 +1,2 @@
-com\lanlan\cacheservice\CacheServiceApplicationTests.class
+com\lanlan\cache\service\CacheServiceTest.class
+com\lanlan\cache\controller\CacheControllerTest.class

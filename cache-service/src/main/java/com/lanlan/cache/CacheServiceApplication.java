@@ -6,9 +6,9 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-public class CacheApplication {
+public class CacheServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CacheApplication.class, args);
+        SpringApplication.run(CacheServiceApplication.class, args);
     }
 }

@@ -1,1 +1,4 @@
-com\lanlan\cacheservice\CacheServiceApplication.class
+com\lanlan\cache\CacheApplication.class
+com\lanlan\cache\controller\CacheController.class
+com\lanlan\cache\controller\CacheController$CacheStats.class
+com\lanlan\cache\service\CacheService.class
