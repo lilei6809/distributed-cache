@@ -181,6 +181,7 @@ public class CuckooHashCache<K, V> {
         long oldestAccess = Long.MAX_VALUE;
 
         // iterate all Entries, find the least recent used entry
+        //TODO: need to be updated with LinkedHashMap
         for (int i = 0; i < capacity; i++) {
             if (targetTable[i] == null) {
                 lruIndex = i;

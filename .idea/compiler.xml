@@ -9,6 +9,7 @@
         <module name="cache-service" />
         <module name="cache-core" />
         <module name="cache-common" />
+        <module name="eureka-server" />
         <module name="cache-client" />
       </profile>
     </annotationProcessing>
@@ -19,6 +20,7 @@
       <module name="cache-common" options="" />
       <module name="cache-core" options="" />
       <module name="cache-service" options="" />
+      <module name="eureka-server" options="" />
     </option>
   </component>
 </project>
