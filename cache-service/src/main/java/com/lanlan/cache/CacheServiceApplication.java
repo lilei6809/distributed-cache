@@ -2,11 +2,13 @@ package com.lanlan.cache;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication
-public class CacheApplication {
+@EnableDiscoveryClient
+public class CacheServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CacheApplication.class, args);
+        SpringApplication.run(CacheServiceApplication.class, args);
     }
 }
