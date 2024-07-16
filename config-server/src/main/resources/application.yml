@@ -1,0 +1,25 @@
+server:
+  port: 8888
+
+spring:
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: file:../config-repo
+#spring:
+#  cloud:
+#    config:
+#      server:
+#        git:
+#          uri: <https://github.com/lilei6809/distributed-cache/config-repo>
+#          default-label: main
+# server.git.uri 配置的是存储配置文件的 Git 仓库的 URL。
+# 具体来说：
+
+# Spring Cloud Config Server 使用这个 Git 仓库来存储和管理所有微服务的配置文件。
+#当配置服务器启动时，它会克隆这个仓库，并从中读取配置信息。
+#当客户端（在我们的案例中是 cache-service）请求其配置时，Config Server 会从这个 Git 仓库中检索相应的配置文件并返回。
+#这允许你集中管理所有微服务的配置，并且可以版本控制这些配置
