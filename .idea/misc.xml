@@ -9,6 +9,7 @@
         <option value="$PROJECT_DIR$/cache-client/pom.xml" />
         <option value="$PROJECT_DIR$/cache-common/pom.xml" />
         <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/config-server/pom.xml" />
       </list>
     </option>
   </component>
