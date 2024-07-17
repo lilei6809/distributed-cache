@@ -1,4 +1,4 @@
-package com.helloworld;
+package com.lanlan.hello;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

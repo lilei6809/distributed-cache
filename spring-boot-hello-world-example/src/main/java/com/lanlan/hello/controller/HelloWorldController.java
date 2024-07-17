@@ -1,4 +1,4 @@
-package com.helloworld.controller;
+package com.lanlan.hello.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 @RestController
