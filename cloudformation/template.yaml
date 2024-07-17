@@ -27,6 +27,10 @@ Metadata:
           - GithubRepoName
           - ThumbprintList   
 Parameters:
+  KeyPairName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
+
   VpcCIDR:
     Description: Please enter the IP range (CIDR notation) for this VPC
     Type: String
@@ -385,6 +389,7 @@ Resources:
   WebappLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
+      KeyName: !Ref KeyPairName
       AssociatePublicIpAddress: true
       ImageId:
         Ref: ImageId
