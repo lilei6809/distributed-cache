@@ -13,6 +13,7 @@ env:
   DOCKER_HUB_USERNAME: lilei6809
   IMAGE_NAME: cache-service
   EC2_HOST: 3.249.105.226
+  SSH_HOST: ec2-3-249-105-226.eu-west-1.compute.amazonaws.com
 
 
 permissions:
@@ -84,7 +85,7 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > EC2_key.pem
           chmod 600 EC2_key.pem
-          ssh -o StrictHostKeyChecking=no -i EC2_key.pem ec2-user@${{ env.EC2_HOST }} '
+          ssh -o StrictHostKeyChecking=no -i EC2_key.pem ec2-user@${{ env.SSH_HOST }} '
             docker pull ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
             docker stop cache-service || true
             docker rm cache-service || true
