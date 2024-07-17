@@ -20,10 +20,7 @@ jobs:
           distribution: 'adopt'
 
       - name: Build with Maven
-        run: mvn clean package -f cache-service/pom.xml
-
-      - name: Run tests
-        run: mvn test -f cache-service/pom.xml
+        run: mvn clean install -X
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
