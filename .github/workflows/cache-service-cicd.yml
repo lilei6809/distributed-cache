@@ -14,7 +14,8 @@ env:
   IMAGE_NAME: cache-service
   EC2_HOST: 3.249.105.226
   SSH_HOST: ec2-3-249-105-226.eu-west-1.compute.amazonaws.com
-
+  role-to-assume: arn:aws:iam::533267241654:policy/GithubActionsDeployerPolicy
+  role-duration-seconds: 1200
 
 permissions:
   id-token: write
