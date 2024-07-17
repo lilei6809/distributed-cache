@@ -72,7 +72,7 @@ jobs:
 
       - name: Set up AWS CLI
         run: |
-          aws configure set region ${{ secrets.AWS_REGION }}
+          aws configure set region ${{ env.AWS_REGION }}
 
       - name: Retrieve EC2 Instance ID
         run: |
