@@ -9,7 +9,7 @@ on:
 env:
   applicationfolder: cache-service
   AWS_REGION: eu-west-1
-  S3BUCKET: codedeploystack-webappdeploymentbucket-vcnlwapss3vj
+  S3BUCKET: codedeploystack-webappdeploymentbucket-pig9d1atoqqu
 
 permissions:
   id-token: write
