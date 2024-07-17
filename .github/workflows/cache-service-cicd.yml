@@ -79,19 +79,11 @@ jobs:
           role-to-assume: ${{ secrets.IAMROLE_GITHUB }}
           role-session-name: GitHub-Action-Role
           aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Deploy to EC2
-        env:
-          PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         run: |
-          echo "$PRIVATE_KEY" > EC2_key.pem
-          chmod 600 EC2_key.pem
-          ssh -o StrictHostKeyChecking=no -i EC2_key.pem ec2-user@${{ env.SSH_HOST }} '
-            docker pull ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-            docker stop cache-service || true
-            docker rm cache-service || true
-            docker run -d --name cache-service -p 8080:8080 ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          '
-          rm -f EC2_key.pem
+          aws ssm start-session --target i-1234567890abcdef0 --document-name AWS-StartInteractiveCommand --parameters command="sudo docker pull ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} && sudo docker stop cache-service || true && sudo docker rm cache-service || true && sudo docker run -d --name cache-service -p 8080:8080 ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
 #      - name: Upload Artifact to s3
 #        working-directory: ${{ env.applicationfolder }}/target
 #        run: aws s3 cp *.jar s3://${{ env.S3BUCKET }}/
