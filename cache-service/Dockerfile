@@ -1,5 +1,6 @@
 FROM openjdk:11-jre-slim
-VOLUME /tmp
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+WORKDIR /app
+COPY target/*.jar app.jar
+RUN ls -l /app
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+EXPOSE 8080
