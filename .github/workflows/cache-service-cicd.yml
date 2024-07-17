@@ -69,14 +69,16 @@ jobs:
         working-directory: ${{ env.applicationfolder }}
         run: $GITHUB_WORKSPACE/.github/scripts/build.sh
 
+      - name: Setup AWS CLI Region
+        run: aws configure set region ${{ secrets.AWS_REGION }}
 
       - name: Retrieve EC2 Instance ID
         run: |
-          INSTANCE_ID=$(aws ec2 describe-instances \
-          --filters "Name=tag:Key,Values=Value" \
-          --query "Reservations[*].Instances[*].InstanceId" \
-          --output text)
-          echo "INSTANCE_ID=$INSTANCE_ID" | tee -a $GITHUB_ENV
+          aws ec2 describe-instances \
+            --filters "Name=tag:Key,Values=Value" \
+            --query "Reservations[*].Instances[*].InstanceId" \
+            --output text
+          echo "Fetched Instance IDs: $INSTANCE_IDS"
 
       - name: Start Session and Deploy
         run: |
