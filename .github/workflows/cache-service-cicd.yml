@@ -12,7 +12,7 @@ env:
   S3BUCKET: codedeploystack-webappdeploymentbucket-pig9d1atoqqu
   DOCKER_HUB_USERNAME: lilei6809
   IMAGE_NAME: cache-service
-  EC2_HOST: your-ec2-host-public-dns-or-ip
+  EC2_HOST: 34.253.237.69
 
 
 permissions:
