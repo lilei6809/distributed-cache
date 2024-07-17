@@ -1,0 +1,287 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation template for Distributed Cache System ECS Infrastructure with Service Discovery'
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC where the ECS cluster will be created
+
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: List of Subnet IDs for the ECS cluster
+
+  InstanceType:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+    Description: EC2 instance type for the ECS cluster
+
+  MinSize:
+    Type: Number
+    Default: 2
+    Description: Minimum number of instances in the Auto Scaling group
+
+  MaxSize:
+    Type: Number
+    Default: 4
+    Description: Maximum number of instances in the Auto Scaling group
+
+  DesiredCapacity:
+    Type: Number
+    Default: 2
+    Description: Desired number of instances in the Auto Scaling group
+
+  DockerHubUsername:
+    Type: String
+    Description: Your DockerHub username
+
+Resources:
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: distributed-cache-cluster
+
+  ECSInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        - !Ref ECSInstanceRole
+
+  ECSInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+        - arn:aws:iam::aws:policy/AWSCloudMapFullAccess
+
+  ECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for ECS instances
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 10.0.0.0/8
+
+  ECSLaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: !Ref 'AWS::Region'
+      InstanceType: !Ref InstanceType
+      SecurityGroups:
+        - !Ref ECSSecurityGroup
+      IamInstanceProfile: !Ref ECSInstanceProfile
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
+
+  ECSAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier: !Ref SubnetIds
+      LaunchConfigurationName: !Ref ECSLaunchConfiguration
+      MinSize: !Ref MinSize
+      MaxSize: !Ref MaxSize
+      DesiredCapacity: !Ref DesiredCapacity
+      Tags:
+        - Key: Name
+          Value: ECS Instance - distributed-cache
+          PropagateAtLaunch: true
+
+  ServiceDiscoveryNamespace:
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+    Properties:
+      Name: distributed-cache.local
+      Vpc: !Ref VpcId
+
+  EurekaServerTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: eureka-server
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - EC2
+      ContainerDefinitions:
+        - Name: eureka-server
+          Image: !Sub ${DockerHubUsername}/eureka-server:latest
+          Cpu: 256
+          Memory: 512
+          PortMappings:
+            - ContainerPort: 8761
+              HostPort: 8761
+              Protocol: tcp
+          Essential: true
+
+  ConfigServerTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: config-server
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - EC2
+      ContainerDefinitions:
+        - Name: config-server
+          Image: !Sub ${DockerHubUsername}/config-server:latest
+          Cpu: 256
+          Memory: 512
+          PortMappings:
+            - ContainerPort: 8888
+              HostPort: 8888
+              Protocol: tcp
+          Essential: true
+
+  CacheServiceTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: cache-service
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - EC2
+      ContainerDefinitions:
+        - Name: cache-service
+          Image: !Sub ${DockerHubUsername}/cache-service:latest
+          Cpu: 512
+          Memory: 1024
+          PortMappings:
+            - ContainerPort: 8080
+              HostPort: 8080
+              Protocol: tcp
+          Essential: true
+
+  EurekaServerDiscoveryService:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Name: eureka-server
+      DnsConfig:
+        NamespaceId: !Ref ServiceDiscoveryNamespace
+        DnsRecords:
+          - Type: A
+            TTL: 60
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+
+  ConfigServerDiscoveryService:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Name: config-server
+      DnsConfig:
+        NamespaceId: !Ref ServiceDiscoveryNamespace
+        DnsRecords:
+          - Type: A
+            TTL: 60
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+
+  CacheServiceDiscoveryService:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Name: cache-service
+      DnsConfig:
+        NamespaceId: !Ref ServiceDiscoveryNamespace
+        DnsRecords:
+          - Type: A
+            TTL: 60
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+
+  EurekaServerService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: eureka-server
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref EurekaServerTaskDefinition
+      DesiredCount: 1
+      LaunchType: EC2
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets: !Ref SubnetIds
+          SecurityGroups:
+            - !Ref ECSSecurityGroup
+      ServiceRegistries:
+        - RegistryArn: !GetAtt EurekaServerDiscoveryService.Arn
+
+  ConfigServerService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: config-server
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref ConfigServerTaskDefinition
+      DesiredCount: 1
+      LaunchType: EC2
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets: !Ref SubnetIds
+          SecurityGroups:
+            - !Ref ECSSecurityGroup
+      ServiceRegistries:
+        - RegistryArn: !GetAtt ConfigServerDiscoveryService.Arn
+
+  CacheServiceService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: cache-service
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref CacheServiceTaskDefinition
+      DesiredCount: 2
+      LaunchType: EC2
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets: !Ref SubnetIds
+          SecurityGroups:
+            - !Ref ECSSecurityGroup
+      ServiceRegistries:
+        - RegistryArn: !GetAtt CacheServiceDiscoveryService.Arn
+
+Outputs:
+  ClusterName:
+    Description: The name of the ECS cluster
+    Value: !Ref ECSCluster
+    Export:
+      Name: !Sub "${AWS::StackName}-ClusterName"
+
+  ECSAutoScalingGroupName:
+    Description: The name of the ECS Auto Scaling Group
+    Value: !Ref ECSAutoScalingGroup
+    Export:
+      Name: !Sub "${AWS::StackName}-ASGName"
+
+  ServiceDiscoveryNamespace:
+    Description: The ID of the Service Discovery Namespace
+    Value: !Ref ServiceDiscoveryNamespace
+    Export:
+      Name: !Sub "${AWS::StackName}-ServiceDiscoveryNamespace"
+
+  EurekaServerServiceName:
+    Description: The name of the Eureka Server ECS Service
+    Value: !Ref EurekaServerService
+    Export:
+      Name: !Sub "${AWS::StackName}-EurekaServerServiceName"
+
+  ConfigServerServiceName:
+    Description: The name of the Config Server ECS Service
+    Value: !Ref ConfigServerService
+    Export:
+      Name: !Sub "${AWS::StackName}-ConfigServerServiceName"
+
+  CacheServiceServiceName:
+    Description: The name of the Cache Service ECS Service
+    Value: !Ref CacheServiceService
+    Export:
+      Name: !Sub "${AWS::StackName}-CacheServiceServiceName"

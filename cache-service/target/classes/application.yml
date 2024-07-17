@@ -1,0 +1,45 @@
+#spring:
+#  application:
+#    name: cache-service
+#  config:
+#    import: "optional:configserver:http://localhost:8881"
+#  cloud:
+#    config:
+#      uri: http://localhost:8881
+#
+#server:
+#  port: 8080
+#
+#eureka:
+#  client:
+#    serviceUrl:
+#      defaultZone: http://localhost:8761/eureka/
+
+spring:
+  application:
+    name: cache-service
+  cloud:
+    config:
+      enabled: false
+
+server:
+  port: 8080
+
+cache:
+  capacity: 10000  # 设置缓存容量，可以根据需要调整
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    com.lanlan.cache: DEBUG
+
+# 如果有其他特定于应用的配置，请在此处添加
