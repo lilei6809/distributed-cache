@@ -58,7 +58,7 @@ Parameters:
     Description: The Amazon EC2 Linux instance Amazon Machine Image (AMI), which designates the configuration of the new instance.
   InstanceType:
     Type: String
-    Default: t2.medium
+    Default: t2.micro
     Description: The type of Amazon EC2 Linux instances that will be launched for this project.
   AutoScalingGroupMinSize:
     Type: Number
@@ -477,7 +477,7 @@ Resources:
         - Ref: ALBTargetGroup
       Tags:
         - Key: Name
-          Value: webapp-example
+          Value: cache-service
           PropagateAtLaunch: true
   ALBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -514,15 +514,15 @@ Resources:
 Outputs:
 
   WebappUrl:
-    Description: Webapp URL
+    Description: CacheService URL
     Value: 
       Fn::Join: 
       - ''
       - - http://
         - !GetAtt ApplicationLoadBalancer.DNSName
-        - ':8080/SpringBootHelloWorldExampleApplication' 
+        - ':8080/cache-service'
   DeploymentGroup:
-    Description: Webapp Deployment Group
+    Description: cache-service Deployment Group
     Value: !Ref WebappDeploymentGroup
   DeploymentBucket:
     Description: Deployment bucket
