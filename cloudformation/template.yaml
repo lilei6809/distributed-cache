@@ -450,6 +450,8 @@ Resources:
               # 拉取并运行  Docker 镜像 
               docker pull lilei6809/cache-service:latest
               docker run -d --name cache-service -p 8080:8080 lilei6809/cache-service:latest
+          
+              
 
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
