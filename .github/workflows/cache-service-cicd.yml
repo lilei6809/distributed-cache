@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  build-and-deploy:
+  build:
     name: Build and Package
     runs-on: ubuntu-latest
 
