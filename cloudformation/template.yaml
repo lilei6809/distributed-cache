@@ -520,9 +520,7 @@ Resources:
       Protocol: HTTP
       VpcId: !Ref VPC
 Outputs:
-  InstanceId:
-    Description: The ID of the EC2 instance
-    Value: !Ref YourEC2InstanceResource
+
   WebappUrl:
     Description: CacheService URL
     Value: 

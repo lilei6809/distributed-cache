@@ -70,6 +70,15 @@ jobs:
         run: $GITHUB_WORKSPACE/.github/scripts/build.sh
 
 
-      - name: Deploy to EC2
+      - name: Retrieve EC2 Instance ID
+        id: get-instance-id
         run: |
-          aws ssm start-session --target i-0ebeef49c2b6eca6b --document-name AWS-StartInteractiveCommand --parameters command="sudo docker pull ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} && sudo docker stop cache-service || true && sudo docker rm cache-service || true && sudo docker run -d --name cache-service -p 8080:8080 ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          INSTANCE_ID=$(aws ec2 describe-instances \
+          --filters "Name=tag:Key,Values=Value" \
+          --query "Reservations[*].Instances[*].InstanceId" \
+          --output text)
+          echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
+
+      - name: Start Session and Deploy
+        run: |
+          aws ssm start-session --target $INSTANCE_ID --document-name AWS-StartInteractiveCommand --parameters command="sudo docker pull ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} && sudo docker stop cache-service || true && sudo docker rm cache-service || true && sudo docker run -d --name cache-service -p 8080:8080 ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
