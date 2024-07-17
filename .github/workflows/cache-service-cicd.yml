@@ -71,14 +71,14 @@ jobs:
 
 
       - name: Retrieve EC2 Instance ID
-        id: get-instance-id
         run: |
           INSTANCE_ID=$(aws ec2 describe-instances \
           --filters "Name=tag:Key,Values=Value" \
           --query "Reservations[*].Instances[*].InstanceId" \
           --output text)
-          echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
+          echo "INSTANCE_ID=$INSTANCE_ID" | tee -a $GITHUB_ENV
 
       - name: Start Session and Deploy
         run: |
-          aws ssm start-session --target $INSTANCE_ID --document-name AWS-StartInteractiveCommand --parameters command="sudo docker pull ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} && sudo docker stop cache-service || true && sudo docker rm cache-service || true && sudo docker run -d --name cache-service -p 8080:8080 ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          echo "Using Instance ID: $INSTANCE_ID"
+          aws ssm start-session --target $INSTANCE_ID --document-name "AWS-StartInteractiveCommand" --parameters 'command="sudo docker pull ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} && sudo docker stop cache-service || true && sudo docker rm cache-service || true && sudo docker run -d --name cache-service -p 8080:8080 ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"'
