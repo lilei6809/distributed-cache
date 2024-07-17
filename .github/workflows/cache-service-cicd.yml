@@ -28,6 +28,15 @@ jobs:
       - uses: actions/checkout@v2
         name: Checkout Repository
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.IAMROLE_GITHUB }}
+          role-session-name: GitHub-Action-Role
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
 #      - uses: aws-actions/configure-aws-credentials@v1
 #        with:
 #          role-to-assume: ${{ secrets.IAMROLE_GITHUB }}
@@ -72,14 +81,7 @@ jobs:
         working-directory: ${{ env.applicationfolder }}
         run: $GITHUB_WORKSPACE/.github/scripts/build.sh
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ secrets.IAMROLE_GITHUB }}
-          role-session-name: GitHub-Action-Role
-          aws-region: ${{ env.AWS_REGION }}
-#          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Deploy to EC2
         run: |
           aws ssm start-session --target i-1234567890abcdef0 --document-name AWS-StartInteractiveCommand --parameters command="sudo docker pull ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} && sudo docker stop cache-service || true && sudo docker rm cache-service || true && sudo docker run -d --name cache-service -p 8080:8080 ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
