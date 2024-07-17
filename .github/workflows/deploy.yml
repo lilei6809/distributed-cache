@@ -9,14 +9,14 @@ env:
   S3BUCKET: codedeploystack-webappdeploymentbucket-vcnlwapss3vj
 
 
-
+permissions:
+  id-token: write
+  contents: read
 jobs:
   build:
     name: Build and Package
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
+
     steps:
       - uses: actions/checkout@v2
         name: Checkout Repository
@@ -48,10 +48,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     environment: Dev
-    permissions:
-      packages: write
-      contents: read
-      id-token: write
     steps:
     - uses: actions/checkout@v2
     - uses: aws-actions/configure-aws-credentials@v1
