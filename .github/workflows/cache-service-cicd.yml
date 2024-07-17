@@ -72,4 +72,11 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          aws ssm start-session --target ${{ secrets.EC2_INSTANCE_ID }} --document-name AWS-StartInteractiveCommand --parameters command="sudo docker pull ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} && sudo docker stop cache-service || true && sudo docker rm cache-service || true && sudo docker run -d --name cache-service -p 8080:8080 ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          aws ssm send-command \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=["sudo docker pull lilei6809/cache-service:${{ github.sha }}",
+                                    "sudo docker stop cache-service || true",
+                                    "sudo docker rm cache-service || true",
+                                    "sudo docker run -d --name cache-service -p 8080:8080 lilei6809/cache-service:${{ github.sha }}"]' \
+            --output text
