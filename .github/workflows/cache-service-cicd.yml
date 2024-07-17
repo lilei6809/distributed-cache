@@ -9,10 +9,10 @@ on:
 env:
   applicationfolder: cache-service
   AWS_REGION: eu-west-1
-  S3BUCKET: codedeploystack-webappdeploymentbucket-pig9d1atoqqu
+  S3BUCKET: cache-service-stack-webappdeploymentbucket-bywaizukrxve
   DOCKER_HUB_USERNAME: lilei6809
   IMAGE_NAME: cache-service
-  EC2_HOST: 34.253.237.69
+  EC2_HOST: 3.249.105.226
 
 
 permissions:
