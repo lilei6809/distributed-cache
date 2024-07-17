@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.lanlan.cache.controller.CacheControllerTest
 -------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.009 s - in com.lanlan.cache.controller.CacheControllerTest
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.962 s - in com.lanlan.cache.controller.CacheControllerTest
