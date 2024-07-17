@@ -8,7 +8,9 @@ env:
   AWS_REGION: eu-west-1
   S3BUCKET: codedeploystack-webappdeploymentbucket-vcnlwapss3vj
 
-
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read
 jobs:
   build:
     name: Build and Package
