@@ -10,6 +10,7 @@
         <option value="$PROJECT_DIR$/cache-common/pom.xml" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/config-server/pom.xml" />
+        <option value="$PROJECT_DIR$/spring-boot-hello-world-example/pom.xml" />
       </list>
     </option>
   </component>

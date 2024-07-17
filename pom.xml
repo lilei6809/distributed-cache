@@ -15,6 +15,7 @@
         <module>cache-service</module>
         <module>cache-client</module>
         <module>eureka-server</module>
+        <module>spring-boot-hello-world-example</module>
     </modules>
 
     <properties>
