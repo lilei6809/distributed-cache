@@ -273,7 +273,22 @@ Resources:
           MaxSessionDuration: 3600
           Description: "Github Actions role"
           Policies:
-          
+          - PolicyName: 'AllowSSMSessionManager'
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - 'ssm:StartSession'
+                    - 'ssm:TerminateSession'
+                    - 'ssm:ResumeSession'
+                    - 'ssm:DescribeSessions'
+                    - 'ssm:GetConnectionStatus'
+                    - 'ssm:SendCommand'
+                  Resource:
+                    - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/*'
+                    - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:document/AWS-StartInteractiveCommand'
+
           - PolicyName: 'CodeDeployRoleforGitHub-policy'
             PolicyDocument:
               Version: '2012-10-17'
@@ -505,7 +520,9 @@ Resources:
       Protocol: HTTP
       VpcId: !Ref VPC
 Outputs:
-
+  InstanceId:
+    Description: The ID of the EC2 instance
+    Value: !Ref YourEC2InstanceResource
   WebappUrl:
     Description: CacheService URL
     Value: 
