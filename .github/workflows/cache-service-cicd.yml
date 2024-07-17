@@ -13,8 +13,6 @@ env:
   DOCKER_HUB_USERNAME: lilei6809
   IMAGE_NAME: cache-service
   EC2_HOST: 3.249.105.226
-  SSH_HOST: ec2-3-249-105-226.eu-west-1.compute.amazonaws.com
-  role-to-assume: arn:aws:iam::533267241654:policy/GithubActionsDeployerPolicy
   role-duration-seconds: 1200
 
 permissions:
@@ -48,6 +46,13 @@ jobs:
         run: mvn clean install
         working-directory: .  # 这会在根目录运行，构建所有模块
 
+      - name: Configure AWS credentials
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.IAMROLE_GITHUB }}
+          role-session-name: GitHub-Action-Role
+          aws-region: ${{ env.AWS_REGION }}
+
       - name: Build Docker image
         run: |
           cd ${{ env.applicationfolder }}
@@ -74,14 +79,7 @@ jobs:
         working-directory: ${{ env.applicationfolder }}
         run: $GITHUB_WORKSPACE/.github/scripts/build.sh
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ secrets.IAMROLE_GITHUB }}
-          role-session-name: GitHub-Action-Role
-          aws-region: ${{ env.AWS_REGION }}
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Deploy to EC2
         run: |
           aws ssm start-session --target i-1234567890abcdef0 --document-name AWS-StartInteractiveCommand --parameters command="sudo docker pull ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} && sudo docker stop cache-service || true && sudo docker rm cache-service || true && sudo docker run -d --name cache-service -p 8080:8080 ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
