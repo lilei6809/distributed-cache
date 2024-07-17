@@ -335,6 +335,10 @@ Resources:
         ToPort: 8080
         SourceSecurityGroupId:
           Ref: ALBSecurityGroup
+      - IpProtocol: -1  # 允许所有协议
+        FromPort: -1    # 允许所有端口
+        ToPort: -1
+        CidrIp: 64.43.50.27/32  # 您的 IP 地址
       SecurityGroupEgress:
       - IpProtocol: '-1'
         CidrIp: 0.0.0.0/0      
