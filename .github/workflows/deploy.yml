@@ -24,6 +24,25 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set and verify AWS region
+        run: |
+          aws configure set region eu-west-1
+          aws configure get region
+      - name: Verify AWS CLI installation
+        run: |
+          aws --version
+          
+      - name: Verify AWS credentials
+        run: |
+          echo "AWS CLI is configured for region: $AWS_DEFAULT_REGION"
+          aws sts get-caller-identity
+
+      - name: Verify STS permissions
+        run: |
+          aws sts get-caller-identity
+          aws sts get-session-token
+
       - name: Test IAM Permissions
         run: |
           echo "Testing EC2 permissions:"
@@ -31,18 +50,22 @@ jobs:
 
           echo "Testing SSM permissions:"
           aws ssm describe-instance-information
-      - name: Debug - Check AWS Configuration and Instance
+      - name: Debug AWS configuration
         run: |
           echo "Configured AWS Region:"
-          aws configure get region
+          aws configure get region || echo "Failed to get region"
 
           echo "EC2 Instance ID: ${{ env.EC2_INSTANCE_ID }}"
 
           echo "Instance State:"
-          aws ec2 describe-instances --instance-ids "${{ env.EC2_INSTANCE_ID }}" --query 'Reservations[].Instances[].State.Name' --output text
+          aws ec2 describe-instances --instance-ids "${{ env.EC2_INSTANCE_ID }}" --query 'Reservations[].Instances[].State.Name' --output text || echo "Failed to describe instances"
 
           echo "Instance Details:"
-          aws ec2 describe-instances --instance-ids "${{ env.EC2_INSTANCE_ID }}" --query 'Reservations[].Instances[].[InstanceId,InstanceType,PublicIpAddress,PrivateIpAddress]' --output table
+          aws ec2 describe-instances --instance-ids "${{ env.EC2_INSTANCE_ID }}" --query 'Reservations[].Instances[].[InstanceId,InstanceType,PublicIpAddress,PrivateIpAddress]' --output table || echo "Failed to get instance details"
+        env:
+          AWS_DEFAULT_REGION: eu-west-1
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Set up JDK 11
         uses: actions/setup-java@v2
