@@ -23,8 +23,27 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
+      - name: Debug - Check AWS Configuration and Instance
+        run: |
+          echo "Configured AWS Region:"
+          aws configure get region
+
+          echo "EC2 Instance ID: ${{ env.EC2_INSTANCE_ID }}"
+
+          echo "Instance State:"
+          aws ec2 describe-instances --instance-ids "${{ env.EC2_INSTANCE_ID }}" --query 'Reservations[].Instances[].State.Name' --output text
+
+          echo "Instance Details:"
+          aws ec2 describe-instances --instance-ids "${{ env.EC2_INSTANCE_ID }}" --query 'Reservations[].Instances[].[InstanceId,InstanceType,PublicIpAddress,PrivateIpAddress]' --output table
+      - name: Test IAM Permissions
+        run: |
+          echo "Testing EC2 permissions:"
+          aws ec2 describe-instances --instance-ids ${{ env.EC2_INSTANCE_ID }}
+
+          echo "Testing SSM permissions:"
+          aws ssm describe-instance-information
       - name: Set up JDK 11
         uses: actions/setup-java@v2
         with:
@@ -58,9 +77,11 @@ jobs:
         run: |
           echo "Using Instance ID: /${{ env.EC2_INSTANCE_ID }}"
 
+
       - name: Deploy to EC2
         run: |
           aws ssm send-command \
+            --region eu-west-1 \
             --instance-ids "${{ env.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
             --parameters 'commands=[
