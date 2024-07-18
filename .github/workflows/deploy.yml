@@ -55,7 +55,7 @@ jobs:
 #          aws-region: ${{ secrets.AWS_REGION }}
       - name: Debug - Print Instance ID
         run:
-          echo "Using Instance ID: ${{ secrets.EC2_INSTANCE_ID }}"
+          echo 'Using Instance ID: ${{ secrets.EC2_INSTANCE_ID }}'
 
       - name: Deploy to EC2
         run: |
