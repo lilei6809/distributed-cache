@@ -100,7 +100,7 @@ jobs:
         run: |
           echo "Using Instance ID: ${{ env.EC2_INSTANCE_ID }}"
 
-
+#1
       - name: Deploy to EC2
         run: |
           aws ssm send-command \
