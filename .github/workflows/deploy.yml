@@ -55,7 +55,7 @@ jobs:
 #          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 #          aws-region: ${{ secrets.AWS_REGION }}
       - name: Debug - Print Instance ID
-        run:
+        run: |
           echo "Using Instance ID: /${{ env.EC2_INSTANCE_ID }}"
 
       - name: Deploy to EC2
