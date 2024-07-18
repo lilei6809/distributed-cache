@@ -10,7 +10,7 @@ env:
   DOCKER_HUB_USERNAME: lilei6809
   IMAGE_NAME: cache-service
   AWS_REGION: eu-west-1
-  EC2_INSTANCE_ID: i-032813a1671f4a986
+  EC2_INSTANCE_ID: i-021ab865f704e0543
 
 jobs:
   build-and-deploy:
@@ -105,7 +105,7 @@ jobs:
         run: |
           aws ssm send-command \
             --region eu-west-1 \
-            --instance-ids i-032813a1671f4a986 \
+            --instance-ids i-021ab865f704e0543 \
             --document-name "AWS-RunShellScript" \
             --parameters 'commands=[
               "docker pull ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}",
