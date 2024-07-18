@@ -403,7 +403,20 @@ Resources:
                   - iam:PassRole
                 Resource:
                   - !Sub 'arn:${AWS::Partition}:codedeploy:*:${AWS::AccountId}:*'
-
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId:
+        Ref: ImageId# 示例 AMI ID，需替换为有效的 AMI ID
+      InstanceType: t2.micro
+      KeyName: !Ref KeyPairName          # 替换为您的 SSH 密钥对名称
+      SecurityGroups:
+        - Ref: WebappSecurityGroup       # 引用或定义安全组
+      Tags:
+        - Key: Role
+          Value: MyAppServer
+        - Key: Environment
+          Value: Production
   WebappInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:

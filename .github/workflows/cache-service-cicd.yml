@@ -34,9 +34,12 @@ jobs:
 
       - name: Select instance ID
         run: |
-          INSTANCE_ID=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].InstanceId' --output text | grep "i-03761e9f0834de182")
+          INSTANCE_ID=$(aws ec2 describe-instances \
+            --filters "Name=tag:Role,Values=MyAppServer" \
+            --query 'Reservations[*].Instances[*].InstanceId' \
+            --output text)
           echo "Selected Instance ID: $INSTANCE_ID"
-  
+          echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
 
       - name: Set up JDK 11
         uses: actions/setup-java@v2
