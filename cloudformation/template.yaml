@@ -407,15 +407,42 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: !Ref ImageId
-      InstanceType: t2.micro
+      InstanceType: !Ref InstanceType
       KeyName: !Ref KeyPairName          # 替换为您的 SSH 密钥对名称
+      IamInstanceProfile: !Ref EC2InstanceProfile
       SecurityGroups:
         - Ref: WebappSecurityGroup       # 引用或定义安全组
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install -y amazon-ssm-agent
+          systemctl enable amazon-ssm-agent
+          systemctl start amazon-ssm-agent
       Tags:
         - Key: Role
           Value: MyAppServer
         - Key: Environment
           Value: Production
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        - !Ref EC2InstanceRole
+  EC2InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+
   WebappInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
@@ -532,6 +559,9 @@ Resources:
       Protocol: HTTP
       VpcId: !Ref VPC
 Outputs:
+  InstanceId:
+    Description: The ID of the EC2 instance
+    Value: !Ref MyEC2Instance
 
   WebappUrl:
     Description: CacheService URL
